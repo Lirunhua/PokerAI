@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#!/usr/bin/env python
 
 import time
 import json
@@ -15,7 +15,7 @@ def takeAction(action, data):
             "eventName": "__action",
             "data": {
                 "action": "bet",
-                "playerName": "player1",
+                "playerNam  e": "player1",
                 "amount": 100
             }
         }))
