@@ -40,14 +40,14 @@ def doListen():
                 "playerName": "player1"
             }
         }))
-        while 1:
-            result = ws.recv()
-            msg = json.loads(result)
-            event_name = msg["eventName"]
-            data = msg["data"]
-            print(event_name)
-            print(data)
-            takeAction(event_name, data)
+        #while 1:
+        #    result = ws.recv()
+        #    msg = json.loads(result)
+        #    event_name = msg["eventName"]
+        #    data = msg["data"]
+        #    print(event_name)
+        #    print(data)
+        #    takeAction(event_name, data)
     except Exception as e:
         print(e)
         doListen()
