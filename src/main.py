@@ -1,53 +1,32 @@
 #!/usr/bin/env python
-
+from takeAction import TakeAction
 import time
 import json
 from websocket import create_connection
+import sys
 
 # pip install websocket-client
-ws = ""
 AI_name = "GLaDOS"
-
-def takeAction(action, data):
-    if action == "__bet":
-        #time.sleep(2)
-        ws.send(json.dumps({
-            "eventName": "__action",
-            "data": {
-                "action": "bet",
-                "playerNam  e": "player1",
-                "amount": 100
-            }
-        }))
-    elif action == "__action":
-        #time.sleep(2)
-        ws.send(json.dumps({
-            "eventName": "__action",
-            "data": {
-                "action": "call",
-                "playerName": "player1"
-            }
-        }))
-
 
 def doListen():
     try:
-        global ws
         ws = create_connection("ws://poker-dev.wrs.club:3001")
         ws.send(json.dumps({
             "eventName": "__join",
             "data": {
-                "playerName": "player1"
+                "playerName": AI_name
             }
         }))
-        #while 1:
-        #    result = ws.recv()
-        #    msg = json.loads(result)
-        #    event_name = msg["eventName"]
-        #    data = msg["data"]
-        #    print(event_name)
-        #    print(data)
-        #    takeAction(event_name, data)
+        action = TakeAction()
+        while 1:
+            result = ws.recv()
+            response = action.processRequest(result)
+            # for debugging
+            print(result)
+            sys.stdout.flush()
+            
+            if response != None:
+                ws.send(response)
     except Exception as e:
         print(e)
         doListen()
