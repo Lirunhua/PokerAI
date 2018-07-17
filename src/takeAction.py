@@ -13,27 +13,27 @@ class TakeAction:
         # The Json for players and table is diffrent for __action, __bet and __show_action.
         if action["eventName"] == "__action":
             # It's our turn, we should respond with an __action.
-            ws.send(json.dumps({
+            return json.dumps({
                 "eventName": "__action",
                 "data": {
                     "action": "call",
                     "playerName": "player1"
                 }
-            }))
+            })
         elif action["eventName"] == "__show_action":
             # Brodcasted to everyone when someone makes an __action (on their turn)
             self.__setTable(action["data"]["table"])
             self.__setPlayers(action["data"]["players"])
         elif action["eventName"] == "__bet":
             # it's out turn, we should do a bet __action but I'm not exactly sure of when it's called.
-            ws.send(json.dumps({
+            return json.dumps({
                 "eventName": "__action",
                 "data": {
                     "action": "bet",
                     "playerNam  e": "player1",
                     "amount": 100
                 }
-            }))
+            })
         elif action["eventName"] == "__deal":
             # The small and big blinds are set!
             self.__setTable(action["data"]["table"])
@@ -55,9 +55,8 @@ class TakeAction:
         elif action["eventName"] == "__new_peer":
             # response to our __join request
             print("I'm in!")
-        elif action["eventName"] == "__test":
-            # The only purpouse of this is for testing
-            print("Hey! It works!")
+
+        return None
     
     ##
     #
@@ -95,6 +94,3 @@ class TakeAction:
    ##
     def __setPlayers(self, players):
         self.__players = players
-
-# for testing purpouses
-TakeAction().processRequest(json.dumps({"eventName" : "__test"}))
