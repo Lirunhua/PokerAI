@@ -63,12 +63,12 @@ class BlackBox:
 			self.inputSize = other.inputSize
 			self.outputSize = other.outputSize
 			self.index = other.index
-			self.recursion = other.recursion
+			self.recursion = other.recursion.copy()
 			self.interval = other.interval
-			self.layerMatrix = other.layerMatrix
-			self.offset = other.offset
+			self.layerMatrix = [[matrix.copy() for matrix in layer] for layer in other.layerMatrix]
+			self.offset = [offset.copy() for offset in other.offset]
 			# Allow multiple mutations
-			for i in range(random.randint(0, layers + 2)):
+			for i in range(random.randint(0, self.layers + 2)):
 				self.mutate()
 
 		def resetRecursion(self):
@@ -107,7 +107,7 @@ class BlackBox:
 				y = numpy.tanh(x)
 			return y
 # Example
-#b = BlackBox(3, 3, 3, 3)
-#b.newGame
-#print(b.run([[1,2,3],[3,4,2]], [[4,5,6],[1,3,5],[4,2,6]], [7,8,9]))
-#b2 = BlackBox(3, 3, 3, 3).clone(b)
+b = BlackBox(3, 3, 3, 3)
+b.newGame
+print(b.run([[1,2,3],[3,4,2]], [[4,5,6],[1,3,5],[4,2,6]], [7,8,9]))
+b2 = BlackBox(3, 3, 3, 3).clone(b)
