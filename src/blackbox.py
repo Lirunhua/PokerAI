@@ -1,5 +1,6 @@
 import random
 import numpy
+import json
 
 # create a recurring neural network with 
 class BlackBox:
@@ -36,7 +37,7 @@ class BlackBox:
 		return self.network.run(otherData + handOut + playerOut)
 
 	class Network:
-		def __init__(self, functionType, inputSize, outputSize, recursionSize, layers = 1):
+		def __init__(self, filename, functionType, inputSize, outputSize, recursionSize, layers = 1):
 			self.functionType = functionType
 			self.layers = layers if layers > 0 else 1
 			self.inputSize = inputSize + recursionSize
@@ -47,15 +48,29 @@ class BlackBox:
 			self.interval = 8
 			self.layerMatrix = []
 			self.offset = []
-			self.__createLayer__(self.inputSize, self.layerSize)
-			for i in range(self.layers - 1):
-				self.__createLayer__(self.layerSize, self.layerSize)
-			self.__createLayer__(self.layerSize, self.outputSize)
+			self.load(filename)
 
 		def __createLayer__(self, inputSize, outputSize):
 			# TODO make this read a file.
 			self.layerMatrix.append([[random.randrange(-self.interval, self.interval) for j in range(inputSize)] for i in range(outputSize)])
 			self.offset.append([random.randrange(-self.interval, self.interval) for i in range(outputSize)])
+		
+		def save(self,filename):
+			with open(filename, 'w+') as f:
+        		json.dump(self.offset, f)
+				json.dump(self.layerMatrix, f)
+			
+		def load(self,filename):
+			if filename.exists():
+				with open(filename, 'r') as f:
+        			data = json.load(f)
+					self.layerMatrix = data[0]
+					self.offset = data[1]
+			else:
+				self.__createLayer__(self.inputSize, self.layerSize)
+				for i in range(self.layers - 1):
+					self.__createLayer__(self.layerSize, self.layerSize)
+				self.__createLayer__(self.layerSize, self.outputSize)
 
 		# Constructor useful for training
 		def clone(self, other):
