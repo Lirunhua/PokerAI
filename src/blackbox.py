@@ -22,7 +22,6 @@ class BlackBox:
         self.playerNetwork.resetRecursion()
         self.network.resetRecursion()
 
-
     def run(self, cards, playersData, otherData):
         if len(cards) == 2:
             self.handNetwork.resetRecursion()
@@ -98,9 +97,9 @@ class BlackBox:
             inputData.extend(self.recursion)
             output = inputData + self.recursion
             for layer in range(len(self.layerMatrix)):
-                output = [self.f(self.offset[layer][i] + sum([output[j] * self.layerMatrix[layer][i][j] 
-                    for j in range(len(self.layerMatrix[layer][i]))])) 
-                    for i in range(len(self.layerMatrix[layer]))]
+                output = [self.f(self.offset[layer][i] + sum([output[j] * self.layerMatrix[layer][i][j]
+                                                              for j in range(len(self.layerMatrix[layer][i]))]))
+                          for i in range(len(self.layerMatrix[layer]))]
             self.recursion = output[self.index:]
             return output[:self.index]
 
@@ -117,15 +116,16 @@ class BlackBox:
             else:
                 self.layerMatrix[l][o][i] += r
 
-
         # Selects the given function for this network, default is linear
         def f(self, x):
             y = x
             if self.functionType == 'sigmoid':
-                y = 1/(1+numpy.exp(-x))
+                y = 1 / (1 + numpy.exp(-x))
             elif self.functionType == 'tanh':
                 y = numpy.tanh(x)
             return y
+
+
 # Example
 filenameArray = ["../data/file1.txt","../data/file2.txt","../data/file3.txt"]
 b = BlackBox(filenameArray, 3, 3, 3, 3)
