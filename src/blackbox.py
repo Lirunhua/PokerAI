@@ -1,14 +1,14 @@
 import random
 import numpy
-
-
-# create a recurring neural network with
+import json
+import os.path
+# create a recurring neural network with 
 class BlackBox:
-    def __init__(self, cardSize, playerSize, inputSize, outputSize):
+    def __init__(self, filenameArray, cardSize, playerSize, inputSize, outputSize):
         self.outputSize = outputSize
-        self.network = self.Network('sigmoid', inputSize + 20, outputSize, 5)  # dummy data
-        self.handNetwork = self.Network('sigmoid', cardSize, 10, cardSize)  # not final
-        self.playerNetwork = self.Network('tanh', playerSize, 10, playerSize)  # not final
+        self.network = self.Network(filenameArray[0], 'sigmoid', inputSize + 20, outputSize, 5)# dummy data
+        self.handNetwork = self.Network(filenameArray[1], 'sigmoid', cardSize, 10, cardSize) # not final
+        self.playerNetwork = self.Network(filenameArray[2], 'tanh', playerSize, 10, playerSize) # not final
 
     # constructor for training
     def clone(self, other):
@@ -35,8 +35,13 @@ class BlackBox:
 
         return self.network.run(otherData + handOut + playerOut)
 
+    def saveAll(self,filenameArray):
+        self.handNetwork.save(filenameArray[0])
+        self.playerNetwork.save(filenameArray[1])
+        self.network.save(filenameArray[2])
+
     class Network:
-        def __init__(self, functionType, inputSize, outputSize, recursionSize, layers=1):
+        def __init__(self, filename, functionType, inputSize, outputSize, recursionSize, layers = 1):
             self.functionType = functionType
             self.layers = layers if layers > 0 else 1
             self.inputSize = inputSize + recursionSize
@@ -47,17 +52,29 @@ class BlackBox:
             self.interval = 8
             self.layerMatrix = []
             self.offset = []
-            self.__createLayer__(self.inputSize, self.layerSize)
-            for i in range(self.layers - 1):
-                self.__createLayer__(self.layerSize, self.layerSize)
-            self.__createLayer__(self.layerSize, self.outputSize)
+            self.load(filename)
 
         def __createLayer__(self, inputSize, outputSize):
             # TODO make this read a file.
-            self.layerMatrix.append(
-                [[random.randrange(-self.interval, self.interval) for j in range(inputSize)] for i in
-                 range(outputSize)])
+            self.layerMatrix.append([[random.randrange(-self.interval, self.interval) for j in range(inputSize)] for i in range(outputSize)])
             self.offset.append([random.randrange(-self.interval, self.interval) for i in range(outputSize)])
+
+        def save(self,filename):
+            with open(filename, 'w+') as f:
+                json.dump([self.offset, self.layerMatrix],f)
+    
+        def load(self,filename):
+            if os.path.isfile(filename) :
+                with open(filename, 'r') as f:
+                    data = json.load(f)
+                    self.layerMatrix = data[0]
+                    self.offset = data[1]
+                    print("loaded from file %s",filename)
+            else:
+                self.__createLayer__(self.inputSize, self.layerSize)
+                for i in range(self.layers - 1):
+                    self.__createLayer__(self.layerSize, self.layerSize)
+                self.__createLayer__(self.layerSize, self.outputSize)
 
         # Constructor useful for training
         def clone(self, other):
@@ -88,12 +105,12 @@ class BlackBox:
 
         # Mutates one value, usually by a small amount but can be a large amount.
         def mutate(self):
-            r = random.randrange(-self.interval ** 4, self.interval ** 4)
-            r = r if r == 0 else self.interval / r
+            r = random.randrange(-self.interval**4, self.interval**4)
+            r = r if r==0 else self.interval / r
             l = random.randint(0, len(self.layerMatrix) - 1)
             o = random.randint(0, len(self.layerMatrix[l]) - 1)
             i = random.randint(0, len(self.layerMatrix[l][o]))
-
+            
             if i == self.inputSize:
                 self.offset[l][o] += r
             else:
@@ -110,7 +127,9 @@ class BlackBox:
 
 
 # Example
-b = BlackBox(3, 3, 3, 3)
+filenameArray = ["../data/file1.txt","../data/file2.txt","../data/file3.txt"]
+b = BlackBox(filenameArray, 3, 3, 3, 3)
 b.newGame
-print(b.run([[1, 2, 3], [3, 4, 2]], [[4, 5, 6], [1, 3, 5], [4, 2, 6]], [7, 8, 9]))
-b2 = BlackBox(3, 3, 3, 3).clone(b)
+b.saveAll(filenameArray)
+print(b.run([[1,2,3],[3,4,2]], [[4,5,6],[1,3,5],[4,2,6]], [7,8,9]))
+b2 = BlackBox(filenameArray,3, 3, 3, 3).clone(b)
