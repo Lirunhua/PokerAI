@@ -1,25 +1,48 @@
 import json
+import random
 
 class TakeAction:
     def __init__(self):
         self.__table = None
         self.__players = None
 
+    def getVectorResponse(self):
+        # format of vector: [check, fold, allin, raise, bet]
+        response = [random.random(), random.random(), random.random(), random.random(), random.random()]
+        print("The response vector is: ", response, "\n")
+        return response
+
+
     # Parses the Json and chooses an appropriate action
     def processRequest(self, jsonObject):
         # if the json is form a file use json.load(file)
         action = json.loads(jsonObject)
+        response = self.getVectorResponse()
 
         # The Json for players and table is diffrent for __action, __bet and __show_action.
         if action["eventName"] == "__action":
             # It's our turn, we should respond with an __action.
-            return json.dumps({
+            actionObj = {
                 "eventName": "__action",
                 "data": {
-                    "action": "call",
-                    "playerName": "player1"
+                    "action:": None
                 }
-            })
+            }
+            maxValue = max(response)
+            maxIndex = response.index(maxValue)
+
+            if maxIndex == 0:
+                actionObj["data"]["action"] = "check"
+            elif maxIndex == 1:
+                actionObj["data"]["action"] = "fold"
+            elif maxIndex == 2:
+                actionObj["data"]["action"] = "allin"
+            elif maxIndex == 3:
+                actionObj["data"]["action"] = "raise"
+            elif maxIndex == 4:
+                actionObj["data"]["action"] = "call"
+
+            return json.dumps(actionObj)
         elif action["eventName"] == "__show_action":
             # Brodcasted to everyone when someone makes an __action (on their turn)
             self.__setTable(action["data"]["table"])
@@ -30,7 +53,6 @@ class TakeAction:
                 "eventName": "__action",
                 "data": {
                     "action": "bet",
-                    "playerNam  e": "player1",
                     "amount": 100
                 }
             })
