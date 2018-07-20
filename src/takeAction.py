@@ -4,10 +4,10 @@ from blackbox import BlackBox
 
 
 class TakeAction:
-    def __init__(self):
+    def __init__(self, files):
         self.__table = None
         self.__players = None
-        self.blackbox = BlackBox(3,3,3,3)
+        self.blackbox = BlackBox(files, 3, 3, 3, 5) # TODO actual input numbers
 
     def getVectorResponse(self):
         # format of vector: [check, fold, allin, raise, bet]
@@ -20,7 +20,7 @@ class TakeAction:
     def processRequest(self, jsonObject):
         # if the json is form a file use json.load(file)
         action = json.loads(jsonObject)
-        response = self.getVectorResponse()
+        response = self.getVectorResponse() # TODO call blackbox.run(...) but not everytime!! this should be called somewhere else!
 
         # The Json for players and table is diffrent for __action, __bet and __show_action.
         if action["eventName"] == "__action":

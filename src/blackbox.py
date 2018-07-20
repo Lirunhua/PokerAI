@@ -2,6 +2,7 @@ import random
 import numpy
 import json
 import os.path
+
 # create a recurring neural network with 
 class BlackBox:
     def __init__(self, filenameArray, cardSize, playerSize, inputSize, outputSize):
