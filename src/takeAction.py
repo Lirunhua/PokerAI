@@ -25,7 +25,8 @@ class TakeAction:
             actionObj = {
                 "eventName": "__action",
                 "data": {
-                    "action:": None
+                    "action:": None,
+                    "playerName": "player1"
                 }
             }
             maxValue = max(response)
@@ -53,6 +54,7 @@ class TakeAction:
                 "eventName": "__action",
                 "data": {
                     "action": "bet",
+                    "playerName": "player1",
                     "amount": 100
                 }
             })
