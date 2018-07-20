@@ -24,7 +24,7 @@ class Main:
             loop = True
             while loop:
                 result = ws.recv()
-                response = action.processRequest(result)
+                response = action.processRequest(result) if result != "" else None
                 # for debugging
                 print(result)
                 sys.stdout.flush()
