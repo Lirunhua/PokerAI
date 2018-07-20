@@ -1,9 +1,11 @@
 import json
+from blackbox import BlackBox
 
 class TakeAction:
     def __init__(self):
         self.__table = None
         self.__players = None
+        self.BlackBox = BlackBox(3,3,3,3)
 
     # Parses the Json and chooses an appropriate action
     def processRequest(self, jsonObject):
