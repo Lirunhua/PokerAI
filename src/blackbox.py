@@ -2,6 +2,7 @@ import random
 import numpy
 import json
 import os.path
+
 # create a recurring neural network with 
 class BlackBox:
     def __init__(self, filenameArray, cardSize, playerSize, inputSize, outputSize):
@@ -126,10 +127,11 @@ class BlackBox:
             return y
 
 
-# Example
-filenameArray = ["../data/file1.txt","../data/file2.txt","../data/file3.txt"]
-b = BlackBox(filenameArray, 3, 3, 3, 3)
-b.newGame
-b.saveAll(filenameArray)
-print(b.run([[1,2,3],[3,4,2]], [[4,5,6],[1,3,5],[4,2,6]], [7,8,9]))
-b2 = BlackBox(filenameArray,3, 3, 3, 3).clone(b)
+# Testing
+if __name__ == '__main__':
+	filenameArray = ["../data/file1.txt","../data/file2.txt","../data/file3.txt"]
+	b = BlackBox(filenameArray, 3, 3, 3, 3)
+	b.newGame
+	b.saveAll(filenameArray)
+	print(b.run([[1,2,3],[3,4,2]], [[4,5,6],[1,3,5],[4,2,6]], [7,8,9]))
+	b2 = BlackBox(filenameArray,3, 3, 3, 3).clone(b)
