@@ -115,7 +115,6 @@ class TakeAction:
     #
    ##
     def __setPlayers(self, players):
-        self.__players = players
         plrs = []
         for plr in players:
             arr = []
