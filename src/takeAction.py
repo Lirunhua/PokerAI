@@ -116,3 +116,18 @@ class TakeAction:
    ##
     def __setPlayers(self, players):
         self.__players = players
+        plrs = []
+        for plr in players:
+            arr = []
+            arr.append(plr["playerName"])
+            arr.append(plr["chips"])
+            arr.append(plr["reloadCount"])
+            arr.append(plr["roundBet"])
+            arr.append(plr["bet"])
+            arr.append(int(plr["folded"]))
+            arr.append(int(plr["allIn"]))
+            arr.append(int(plr["isSurvive"]))
+            plrs.append(arr)
+
+        print(str(plrs))
+        self.__players = plrs
