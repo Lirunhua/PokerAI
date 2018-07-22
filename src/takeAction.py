@@ -71,6 +71,7 @@ class TakeAction:
             # The round begins, we have some useful info here.
             self.__setTable(action["data"]["table"])
             self.__setPlayers(action["data"]["players"])
+            DM.__init__(self.__table, self.__players, action) #init our decision maker
         elif action["eventName"] == "__round_end":
             # End of a round, shows everything. Usefull for dynamic learning
             self.__setTable(action["data"]["table"])
