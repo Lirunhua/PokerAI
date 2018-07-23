@@ -10,9 +10,10 @@ class Main:
         self.AI_name = name
         self.filenames = filenames
 
-    def doListen(self):
+    # default url is test server.
+    def doListen(self, url="ws://poker-dev.wrs.club:3001"):
         try:
-            ws = create_connection("ws://poker-dev.wrs.club:3001")
+            ws = create_connection(url)
             ws.settimeout(5000)
             ws.send(json.dumps({
                 "eventName": "__join",
@@ -25,18 +26,18 @@ class Main:
             while loop:
                 result = ws.recv()
                 response = action.processRequest(result) if result != "" else None
-                # for debugging
-                print(result)
                 sys.stdout.flush()
                 
                 if response != None:
                     ws.send(response)
-                loop = False
+                    #loop = False
         except Exception as e:
+            print("An error has occured")
             print(e)
-            #self.doListen()
+            sys.stdout.flush()
+            self.doListen()
 
 
 if __name__ == '__main__':
-    m = Main()
-    m.doListen()
+    m1 = Main()
+    m1.doListen() # TODO insert battleserver url here

@@ -5,9 +5,11 @@ from blackbox import BlackBox
 
 class TakeAction:
     def __init__(self, files):
+        self.__cards = None
+        self.__tableCards = None
         self.__table = None
         self.__players = None
-        self.blackbox = BlackBox(files, 3, 3, 3, 5) # TODO actual input numbers
+        self.blackbox = BlackBox(files, 6, 7, 7, 5)
 
     def getVectorResponse(self):
         # format of vector: [check, fold, allin, raise, bet]
@@ -20,10 +22,14 @@ class TakeAction:
     def processRequest(self, jsonObject):
         # if the json is form a file use json.load(file)
         action = json.loads(jsonObject)
-        response = self.getVectorResponse() # TODO call blackbox.run(...) but not everytime!! this should be called somewhere else!
+        print(action["eventName"])
 
         # The Json for players and table is diffrent for __action, __bet and __show_action.
         if action["eventName"] == "__action":
+            cards = self.__cards.copy()
+            cards.extend(self.__tableCards)
+            response = self.blackbox.run(cards, self.__players,self.__table)
+            print(response)
             # It's our turn, we should respond with an __action.
             actionObj = {
                 "eventName": "__action",
@@ -64,8 +70,9 @@ class TakeAction:
             self.__setTable(action["data"]["table"])
             self.__setPlayers(action["data"]["players"])
         elif action["eventName"] == "__start_reload":
-            # We got 3 seconds to reload our chips. (automatic action if we have no chips left) The max count limit is set before the match
-            self.__setPlayers(action["data"]["players"])
+            # We got 3 seconds to reload our chips.
+            #self.__setPlayers(action["data"]["players"])
+            return json.dumps({"eventName" : "__reload"})
         elif action["eventName"] == "__new_round":
             # The round begins, we have some useful info here.
             self.__setTable(action["data"]["table"])
@@ -89,7 +96,7 @@ class TakeAction:
     #
     #   tableNumber     int             Id of the table.
     #   roundName       String          Name of the round. (preflop, flop, turn, river)
-    #   board"          String Array    Probably the cards in the middle.
+    #   board           String Array    Probably the cards in the middle.
     #   roundCount      int             Max amount of reloads I think.
     #   raiseCount      int             Not sure.
     #   betCount        int             Number of raises this round.
@@ -99,7 +106,17 @@ class TakeAction:
     #
    ##
     def __setTable(self, table):
-        self.__table = table
+        tbl = []
+        tbl.append(self.normalize(table['tableNumber']))
+        tbl.append(self.normalize(table['roundCount']))
+        tbl.append(self.normalize(table['raiseCount']))
+        tbl.append(self.normalize(table['betCount']))
+        tbl.append(self.normalize(table['totalBet']))
+        tbl.append(self.normalize(table['smallBlind']['amount']))
+        tbl.append(self.normalize(table['bigBlind']['amount']))
+        self.__tableCards = [self.__parseCards(c) for c in table['board']]
+        self.__table = tbl
+
 
     ##
     #
@@ -121,15 +138,25 @@ class TakeAction:
         plrs = []
         for plr in players:
             arr = []
-            arr.append(plr["playerName"])
-            arr.append(plr["chips"])
-            arr.append(plr["reloadCount"])
-            arr.append(plr["roundBet"])
-            arr.append(plr["bet"])
+            arr.append(self.normalize(plr["chips"]))
+            arr.append(self.normalize(plr["reloadCount"]))
+            arr.append(self.normalize(plr["roundBet"]))
+            arr.append(self.normalize(plr["bet"]))
             arr.append(int(plr["folded"]))
             arr.append(int(plr["allIn"]))
             arr.append(int(plr["isSurvive"]))
             plrs.append(arr)
-
-        print(str(plrs))
+            if 'cards' in plr:
+                self.__cards = [self.__parseCards(c) for c in plr['cards']]
         self.__players = plrs
+
+    def normalize(self, x):
+        return 0 if x == 0 else 1/float(x)
+
+    def __parseCards(self, card):
+        c = []
+        num = "A23456789TJQK".index(card[0]) * 4 + "HDCS".index(card[1])
+        for i in [32,16,8,4,2,1]:
+            c.append(1 if num >= i else 0)
+            num = num - i if num >= i else num
+        return c
