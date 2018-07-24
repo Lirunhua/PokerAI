@@ -1,6 +1,8 @@
 import json
 import random
 from blackbox import BlackBox
+import slackClient
+import operator
 
 
 class TakeAction:
@@ -9,6 +11,7 @@ class TakeAction:
         self.__tableCards = None
         self.__table = None
         self.__players = None
+        self.slackMessage = ""
         self.blackbox = BlackBox(files, 6, 7, 7, 5)
 
     def getVectorResponse(self):
@@ -22,6 +25,7 @@ class TakeAction:
     def processRequest(self, jsonObject):
         # if the json is form a file use json.load(file)
         action = json.loads(jsonObject)
+        self.slackMessage = "" # reset message
         print(action["eventName"])
 
         # The Json for players and table is diffrent for __action, __bet and __show_action.
@@ -46,6 +50,9 @@ class TakeAction:
                 actionObj["data"]["action"] = "fold"
             elif maxIndex == 2:
                 actionObj["data"]["action"] = "allin"
+                if action["data"]["chips"] >= 5000:
+                    self.slackMessage = "Oh boy. We are betting " + action["data"]["self"]["chips"] + " chips!!! Wish me luck."
+                    self.__sendSlackStatus()
             elif maxIndex == 3:
                 actionObj["data"]["action"] = "raise"
             elif maxIndex == 4:
@@ -84,12 +91,28 @@ class TakeAction:
         elif action["eventName"] == "__game_over":
             # Shows the winner
             print("The cake was a lie!")
+            if action["data"]["self"]["isSurvive"]:
+                self.slackMessage = "We survived!"
+            else:
+                self.slackMessage = "We didn't survive."
+            self.__sendSlackStatus()
         elif action["eventName"] == "__new_peer":
             # response to our __join request
             print("I'm in!")
 
         return None
-    
+
+    # Calculates how well we're doing at the end of the game out of all the players
+    # for now, we will send a message if we survived or not.
+    # def __calculatePlace(self):
+    #     self.slackMessage = "The game finished. I came in place #" + index+1
+    #     self.__sendSlackStatus()
+
+    # sends AI status to slack webhook
+    def __sendSlackStatus(self):
+        slackClient.sendMessage(self.slackMessage)
+
+
     ##
     #
     # Table object
