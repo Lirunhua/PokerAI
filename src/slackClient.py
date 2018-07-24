@@ -2,7 +2,7 @@
 import json
 import requests
 
-webhook_url = ''
+webhook_url = 'https://hooks.slack.com/services/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'
 
 def sendMessage(message):
     slack_data = {'text': message}

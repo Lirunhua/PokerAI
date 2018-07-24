@@ -51,7 +51,7 @@ class TakeAction:
             elif maxIndex == 2:
                 actionObj["data"]["action"] = "allin"
                 if action["data"]["chips"] >= 5000:
-                    self.slackMessage = "Oh boy. We are betting " + action["data"]["self"]["chips"] + " chips!!! Wish me luck."
+                    self.slackMessage = "Oh boy. We are betting " + action["data"]["chips"] + " chips!!! Wish me luck."
                     self.__sendSlackStatus()
             elif maxIndex == 3:
                 actionObj["data"]["action"] = "raise"
@@ -91,7 +91,7 @@ class TakeAction:
         elif action["eventName"] == "__game_over":
             # Shows the winner
             print("The cake was a lie!")
-            if action["data"]["self"]["isSurvive"]:
+            if action["data"]["isSurvive"]:
                 self.slackMessage = "We survived!"
             else:
                 self.slackMessage = "We didn't survive."
