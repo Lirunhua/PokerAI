@@ -11,7 +11,7 @@ class Main:
         self.filenames = filenames
 
     # default url is test server.
-    def doListen(self, url="ws://canada-ai-warmup-battle-7da4ce4b0426974c.elb.us-east-1.amazonaws.com/"):
+    def doListen(self, url="ws://poker-dev.wrs.club:3001"):
         try:
             ws = create_connection(url)
             ws.settimeout(5000)
@@ -40,4 +40,4 @@ class Main:
 
 if __name__ == '__main__':
     m1 = Main()
-    m1.doListen() # TODO insert battleserver url here
+    m1.doListen("ws://canada-ai-warmup-battle-7da4ce4b0426974c.elb.us-east-1.amazonaws.com/")
