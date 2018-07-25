@@ -22,7 +22,7 @@ class Main:
                     "playerName": self.AI_name
                 }
             }))
-            action = TakeAction(self.filenames)
+            action = TakeAction(self.filenames, self.debugMode)
             loop = True
             while loop:
                 result = ws.recv()

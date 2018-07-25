@@ -2,17 +2,18 @@ import json
 import random
 from blackbox import BlackBox
 import slackClient
-import operator
 
 
 class TakeAction:
-    def __init__(self, files):
+    def __init__(self, files, debugMode):
         self.__cards = None
         self.__tableCards = None
         self.__table = None
         self.__players = None
+        self.debugMode = debugMode
         self.slackMessage = ""
         self.blackbox = BlackBox(files, 6, 7, 7, 5)
+        self.playerName = -1
 
     def getVectorResponse(self):
         # format of vector: [check, fold, allin, raise, bet]
@@ -30,6 +31,10 @@ class TakeAction:
 
         # The Json for players and table is diffrent for __action, __bet and __show_action.
         if action["eventName"] == "__action":
+            if self.playerName == -1:
+                self.playerName = action["data"]["self"]["playerName"]
+                print("Hello. My name is " + self.playerName)
+
             cards = self.__cards.copy()
             cards.extend(self.__tableCards)
             response = self.blackbox.run(cards, self.__players,self.__table)
@@ -50,8 +55,8 @@ class TakeAction:
                 actionObj["data"]["action"] = "fold"
             elif maxIndex == 2:
                 actionObj["data"]["action"] = "allin"
-                if action["data"]["chips"] >= 5000:
-                    self.slackMessage = "Oh boy. We are betting " + action["data"]["chips"] + " chips!!! Wish me luck."
+                if action["data"]["self"]["chips"] >= 5000:
+                    self.slackMessage = "Oh boy. We are betting " + action["data"]["self"]["chips"] + " chips!!! Wish me luck."
                     self.__sendSlackStatus()
             elif maxIndex == 3:
                 actionObj["data"]["action"] = "raise"
@@ -91,7 +96,9 @@ class TakeAction:
         elif action["eventName"] == "__game_over":
             # Shows the winner
             print("The cake was a lie!")
-            if action["data"]["isSurvive"]:
+            # print(action["data"]["players"][self.playerName])
+
+            if self.__Survive(action):
                 self.slackMessage = "We survived!"
             else:
                 self.slackMessage = "We didn't survive."
@@ -102,15 +109,19 @@ class TakeAction:
 
         return None
 
-    # Calculates how well we're doing at the end of the game out of all the players
-    # for now, we will send a message if we survived or not.
-    # def __calculatePlace(self):
-    #     self.slackMessage = "The game finished. I came in place #" + index+1
+    # Checks if we survived or not.
+    def __Survive(self, action):
+        for element in action["data"]["players"]:
+            print(element)
+            if element["playerName"] == self.playerName and element["isSurvive"]:
+                return True
+        return False
     #     self.__sendSlackStatus()
 
     # sends AI status to slack webhook
     def __sendSlackStatus(self):
-        slackClient.sendMessage(self.slackMessage)
+        if self.debugMode == False:
+            slackClient.sendMessage(self.slackMessage)
 
 
     ##
