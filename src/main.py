@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 from takeAction import TakeAction
-import time
 import json
 from websocket import create_connection
 import sys
@@ -9,6 +8,7 @@ class Main:
     def __init__(self, name="197818", filenames = ["../data/file1.txt","../data/file2.txt","../data/file3.txt"]):
         self.AI_name = name
         self.filenames = filenames
+        self.action = TakeAction(self.filenames)
 
     # default url is test server.
     def doListen(self, url="ws://poker-dev.wrs.club:3001"):
@@ -21,16 +21,17 @@ class Main:
                     "playerName": self.AI_name
                 }
             }))
-            action = TakeAction(self.filenames)
             loop = True
             while loop:
                 result = ws.recv()
-                response = action.processRequest(result) if result != "" else None
+                response = self.action.processRequest(result) if result != "" else None
                 sys.stdout.flush()
                 
-                if response != None:
+                if response == False:
+                    loop = False
+                elif response != None:
                     ws.send(response)
-                    #loop = False
+            print ("exited the loop!")
         except Exception as e:
             print("An error has occured")
             print(e)

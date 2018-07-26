@@ -22,14 +22,14 @@ class TakeAction:
     def processRequest(self, jsonObject):
         # if the json is form a file use json.load(file)
         action = json.loads(jsonObject)
-        print(action["eventName"])
+        #print(action["eventName"])
 
         # The Json for players and table is diffrent for __action, __bet and __show_action.
         if action["eventName"] == "__action":
             cards = self.__cards.copy()
             cards.extend(self.__tableCards)
             response = self.blackbox.run(cards, self.__players,self.__table)
-            print(response)
+            #print(response)
             # It's our turn, we should respond with an __action.
             actionObj = {
                 "eventName": "__action",
@@ -84,9 +84,12 @@ class TakeAction:
         elif action["eventName"] == "__game_over":
             # Shows the winner
             print("The cake was a lie!")
+            if True: # TODO, add training boolean here, also show winner.
+                return False
         elif action["eventName"] == "__new_peer":
             # response to our __join request
-            print("I'm in!")
+            if False:
+                print("I'm in!")
 
         return None
     

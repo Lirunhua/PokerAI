@@ -7,6 +7,7 @@ import os.path
 class BlackBox:
     def __init__(self, filenameArray, cardSize, playerSize, inputSize, outputSize):
         self.outputSize = outputSize
+        self.filenameArray = filenameArray
         self.network = self.Network(filenameArray[0], 'sigmoid', inputSize + 20, outputSize, 5)# dummy data
         self.handNetwork = self.Network(filenameArray[1], 'sigmoid', cardSize, 10, cardSize) # not final
         self.playerNetwork = self.Network(filenameArray[2], 'tanh', playerSize, 10, playerSize) # not final
@@ -36,10 +37,10 @@ class BlackBox:
 
         return self.network.run(otherData + handOut + playerOut)
 
-    def saveAll(self,filenameArray):
-        self.network.save(filenameArray[0])
-        self.handNetwork.save(filenameArray[1])
-        self.playerNetwork.save(filenameArray[2])
+    def saveAll(self):
+        self.network.save(self.filenameArray[0])
+        self.handNetwork.save(self.filenameArray[1])
+        self.playerNetwork.save(self.filenameArray[2])
 
     class Network:
         def __init__(self, filename, functionType, inputSize, outputSize, recursionSize, layers = 1):
