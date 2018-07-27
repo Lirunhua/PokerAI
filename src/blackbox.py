@@ -112,7 +112,7 @@ class BlackBox:
             o = random.randint(0, len(self.layerMatrix[l]) - 1)
             i = random.randint(0, len(self.layerMatrix[l][o]))
             
-            if i == self.inputSize:
+            if i == len(self.layerMatrix[l][o]):
                 self.offset[l][o] += r
             else:
                 self.layerMatrix[l][o][i] += r

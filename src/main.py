@@ -2,7 +2,7 @@
 from takeAction import TakeAction
 import json
 from websocket import create_connection
-import sys
+import sys, os
 
 class Main:
     def __init__(self, name="197818", filenames = ["../data/file1.txt","../data/file2.txt","../data/file3.txt"]):
@@ -27,16 +27,19 @@ class Main:
                 response = self.action.processRequest(result) if result != "" else None
                 sys.stdout.flush()
                 
-                if response == False:
-                    loop = False
-                elif response != None:
+                if response != None:
                     ws.send(response)
             print ("exited the loop!")
         except Exception as e:
             print("An error has occured")
-            print(e)
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            print(exc_type, fname, exc_tb.tb_lineno)
             sys.stdout.flush()
             self.doListen()
+
+    def setAction(self, action):
+        self.action = action
 
 
 if __name__ == '__main__':

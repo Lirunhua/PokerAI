@@ -10,6 +10,14 @@ class TakeAction:
         self.__table = None
         self.__players = None
         self.blackbox = BlackBox(files, 6, 7, 7, 5)
+        self.win = True
+        self.doCallback = False
+        self.endGameCallback = None
+        self.playerName = ""
+
+    def setCallback(self, callback):
+        self.doCallback = True
+        self.endGameCallback = callback
 
     def getVectorResponse(self):
         # format of vector: [check, fold, allin, raise, bet]
@@ -51,6 +59,8 @@ class TakeAction:
             elif maxIndex == 4:
                 actionObj["data"]["action"] = "call"
 
+            self.playerName = action["data"]["self"]["playerName"]
+
             return json.dumps(actionObj)
         elif action["eventName"] == "__show_action":
             # Brodcasted to everyone when someone makes an __action (on their turn)
@@ -83,9 +93,12 @@ class TakeAction:
             self.__setPlayers(action["data"]["players"])
         elif action["eventName"] == "__game_over":
             # Shows the winner
-            print("The cake was a lie!")
-            if True: # TODO, add training boolean here, also show winner.
-                return False
+            self.win = False
+            for w in action["data"]["winners"]:
+                if w["playerName"] == self.playerName:
+                    self.win = True
+            if self.doCallback:
+                self.endGameCallback(self)
         elif action["eventName"] == "__new_peer":
             # response to our __join request
             if False:
