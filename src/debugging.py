@@ -2,22 +2,14 @@ from main import Main
 import threading
 
 if __name__ == '__main__':
-    m1 = Main('GLaDOS')
-    m2 = Main('GLaDOS2')
-    m3 = Main('GLaDOS3')
+  main = [Main('GLaDOS%d'%i) for i in range(10)]
+  thread = []
+  for m in main:
+    m.debugMode = True
+	  thread.append(threading.Thread(target=m.doListen))
 
-    m1.debugMode = True
-    m2.debugMode = True
-    m3.debugMode = True
+	for t in thread:
+		t.start()
 
-    t1 = threading.Thread(target=m1.doListen)
-    t2 = threading.Thread(target=m2.doListen)
-    t3 = threading.Thread(target=m3.doListen)
-
-    t1.start()
-    t2.start()
-    t3.start()
-
-    t1.join()
-    t2.join()
-    t3.join()
+	for t in thread:
+		t.join()
