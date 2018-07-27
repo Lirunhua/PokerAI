@@ -9,6 +9,7 @@ class Main:
     def __init__(self, name="197818", filenames = ["../data/file1.txt","../data/file2.txt","../data/file3.txt"]):
         self.AI_name = name
         self.filenames = filenames
+        self.debugMode = False
 
     # default url is test server.
     def doListen(self, url="ws://poker-dev.wrs.club:3001"):
@@ -21,7 +22,7 @@ class Main:
                     "playerName": self.AI_name
                 }
             }))
-            action = TakeAction(self.filenames)
+            action = TakeAction(self.filenames, self.debugMode)
             loop = True
             while loop:
                 result = ws.recv()
