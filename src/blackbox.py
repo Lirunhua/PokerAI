@@ -2,6 +2,7 @@ import random
 import numpy
 import json
 import os.path
+
 # create a recurring neural network with 
 class BlackBox:
     def __init__(self, filenameArray, cardSize, playerSize, inputSize, outputSize):
@@ -36,9 +37,9 @@ class BlackBox:
         return self.network.run(otherData + handOut + playerOut)
 
     def saveAll(self,filenameArray):
-        self.handNetwork.save(filenameArray[0])
-        self.playerNetwork.save(filenameArray[1])
-        self.network.save(filenameArray[2])
+        self.network.save(filenameArray[0])
+        self.handNetwork.save(filenameArray[1])
+        self.playerNetwork.save(filenameArray[2])
 
     class Network:
         def __init__(self, filename, functionType, inputSize, outputSize, recursionSize, layers = 1):
@@ -55,7 +56,6 @@ class BlackBox:
             self.load(filename)
 
         def __createLayer__(self, inputSize, outputSize):
-            # TODO make this read a file.
             self.layerMatrix.append([[random.randrange(-self.interval, self.interval) for j in range(inputSize)] for i in range(outputSize)])
             self.offset.append([random.randrange(-self.interval, self.interval) for i in range(outputSize)])
 
@@ -67,9 +67,9 @@ class BlackBox:
             if os.path.isfile(filename) :
                 with open(filename, 'r') as f:
                     data = json.load(f)
-                    self.layerMatrix = data[0]
-                    self.offset = data[1]
-                    print("loaded from file %s",filename)
+                    self.layerMatrix = data[1]
+                    self.offset = data[0]
+                    # print("loaded from file %s",filename)
             else:
                 self.__createLayer__(self.inputSize, self.layerSize)
                 for i in range(self.layers - 1):
@@ -97,9 +97,9 @@ class BlackBox:
             inputData.extend(self.recursion)
             output = inputData + self.recursion
             for layer in range(len(self.layerMatrix)):
-                output = [self.f(self.offset[layer][i] + sum([output[j] * self.layerMatrix[layer][i][j]
-                                                              for j in range(len(self.layerMatrix[layer][i]))]))
-                          for i in range(len(self.layerMatrix[layer]))]
+                output = [self.f(float(self.offset[layer][i]) + sum([float(output[j]) * float(self.layerMatrix[layer][i][j])
+                            for j in range(len(self.layerMatrix[layer][i]))]))
+                            for i in range(len(self.layerMatrix[layer]))]
             self.recursion = output[self.index:]
             return output[:self.index]
 
@@ -126,10 +126,11 @@ class BlackBox:
             return y
 
 
-# Example
-filenameArray = ["../data/file1.txt","../data/file2.txt","../data/file3.txt"]
-b = BlackBox(filenameArray, 3, 3, 3, 3)
-b.newGame
-b.saveAll(filenameArray)
-print(b.run([[1,2,3],[3,4,2]], [[4,5,6],[1,3,5],[4,2,6]], [7,8,9]))
-b2 = BlackBox(filenameArray,3, 3, 3, 3).clone(b)
+# Testing
+if __name__ == '__main__':
+    filenameArray = ["../data/file1.txt","../data/file2.txt","../data/file3.txt"]
+    b = BlackBox(filenameArray, 6, 7, 7, 5)
+    b.newGame
+    b.saveAll(filenameArray)
+    #print(b.run([[1,2,3],[3,4,2]], [[4,5,6],[1,3,5],[4,2,6]], [7,8,9]))
+    b2 = BlackBox(filenameArray,6, 7, 7, 5).clone(b)
