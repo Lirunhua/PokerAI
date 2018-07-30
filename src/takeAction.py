@@ -32,7 +32,7 @@ class TakeAction:
         self.slackMessage = "" # reset message
         print(action["eventName"])
 
-        # The Json for players and table is diffrent for __action, __bet and __show_action.
+        # The Json for players and table is different for __action, __bet and __show_action.
         if action["eventName"] == "__action":
             if self.playerName == -1:
                 self.playerName = action["data"]["self"]["playerName"]
@@ -76,7 +76,7 @@ class TakeAction:
                 "eventName": "__action",
                 "data": {
                     "action": "bet",
-                    "amount": 100
+                    "amount": self.response[6] * action["data"]["self"]["chips"]
                 }
             })
         elif action["eventName"] == "__deal":
