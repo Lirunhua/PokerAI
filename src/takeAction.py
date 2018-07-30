@@ -71,12 +71,13 @@ class TakeAction:
             self.__setTable(action["data"]["table"])
             self.__setPlayers(action["data"]["players"])
         elif action["eventName"] == "__bet":
+            print("Betting: " + str(self.response[6] * action["data"]["self"]["chips"]) + "\n")
             # it's out turn, we should do a bet __action but I'm not exactly sure of when it's called.
             return json.dumps({
                 "eventName": "__action",
                 "data": {
                     "action": "bet",
-                    "amount": self.response[6] * action["data"]["self"]["chips"]
+                    "amount": int(self.response[6] * action["data"]["self"]["chips"])
                 }
             })
         elif action["eventName"] == "__deal":
@@ -85,7 +86,9 @@ class TakeAction:
             self.__setPlayers(action["data"]["players"])
         elif action["eventName"] == "__start_reload":
             # we should either reload or not, so T/F
+            print("Reload probability " + str(self.response[5]) + "\n")
             if self.reloadCount > 0 and self.response[5] > 0.5:
+                print("Reloaded!\n")
                 return json.dumps({"eventName" : "__reload"})
         elif action["eventName"] == "__new_round":
             # The round begins, we have some useful info here.
