@@ -12,14 +12,17 @@ class TakeAction:
         self.__players = None
         self.debugMode = debugMode
         self.slackMessage = ""
-        self.blackbox = BlackBox(files, 6, 7, 7, 5)
+        self.blackbox = BlackBox(files, 6, 7, 7, 7)
         self.playerName = -1
+        self.response = []
+        self.reloadCount = 2
 
     def getVectorResponse(self):
-        # format of vector: [check, fold, allin, raise, bet]
-        response = [random.random(), random.random(), random.random(), random.random(), random.random()]
-        print("The response vector is: ", response, "\n")
-        return response
+        # format of response vector: [check, fold, allin, raise, bet, reload (T/F), bet amount]
+        cards = self.__cards.copy()
+        cards.extend(self.__tableCards)
+        self.response = self.blackbox.run(cards, self.__players, self.__table)
+        print(self.response)
 
 
     # Parses the Json and chooses an appropriate action
@@ -35,10 +38,9 @@ class TakeAction:
                 self.playerName = action["data"]["self"]["playerName"]
                 print("Hello. My name is " + self.playerName)
 
-            cards = self.__cards.copy()
-            cards.extend(self.__tableCards)
-            response = self.blackbox.run(cards, self.__players,self.__table)
-            print(response)
+            self.getVectorResponse()
+            response = self.response[:5]
+
             # It's our turn, we should respond with an __action.
             actionObj = {
                 "eventName": "__action",
@@ -82,9 +84,9 @@ class TakeAction:
             self.__setTable(action["data"]["table"])
             self.__setPlayers(action["data"]["players"])
         elif action["eventName"] == "__start_reload":
-            # We got 3 seconds to reload our chips.
-            #self.__setPlayers(action["data"]["players"])
-            return json.dumps({"eventName" : "__reload"})
+            # we should either reload or not, so T/F
+            if self.reloadCount > 0 and self.response[5] > 0.5:
+                return json.dumps({"eventName" : "__reload"})
         elif action["eventName"] == "__new_round":
             # The round begins, we have some useful info here.
             self.__setTable(action["data"]["table"])
