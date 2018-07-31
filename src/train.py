@@ -45,7 +45,7 @@ class Table:
     def run(self, players):
         # Assign network to players.
         for i in range(self.playerCount):
-            print(players[i].blackbox.filenameArray)
+            #print(players[i].blackbox.filenameArray)
             self.players[i].setAction(players[i])
             # assign callback
             self.players[i].action.setCallback(self.end)
@@ -72,7 +72,7 @@ class Table:
 
 
 # Create the population.
-population = 20
+population = 25
 everyone = [TakeAction(["../data/trainingFile_%d_1.txt"%i,"../data/trainingFile_%d_2.txt"%i,"../data/trainingFile_%d_3.txt"%i]) for i in range(population)]
 botPool = everyone[:] #shallow copy
 tables = [Table(10, ['GLaDOS%d'%i for i in range(10)], botPool[:10]).tableConstructor()]
