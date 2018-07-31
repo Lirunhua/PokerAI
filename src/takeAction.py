@@ -12,13 +12,16 @@ class TakeAction:
         self.__players = None
         self.debugMode = debugMode
         self.slackMessage = ""
-        self.blackbox = BlackBox(files, 6, 7, 7, 7)
+        self.blackbox = BlackBox(files, 6, 7, 7, 6)
         self.playerName = -1
-        self.response = []
+        self.response = [0, 0, 0, 0, 0, 0]
         self.reloadCount = 2
+        self.reload = 0
+        self.betAmount = 100
 
     def getVectorResponse(self):
-        # format of response vector: [check, fold, allin, raise, bet, reload (T/F), bet amount]
+        # format of response vector: [call/check, fold, allin, raise/bet, reload (T/F), bet amount]
+        # we can also perform a check (i.e. calling with an amount of 0 chips)
         cards = self.__cards.copy()
         cards.extend(self.__tableCards)
         self.response = self.blackbox.run(cards, self.__players, self.__table)
@@ -29,7 +32,7 @@ class TakeAction:
     def processRequest(self, jsonObject):
         # if the json is form a file use json.load(file)
         action = json.loads(jsonObject)
-        self.slackMessage = "" # reset message
+        self.slackMessage = ""  # reset message
         print(action["eventName"])
 
         # The Json for players and table is different for __action, __bet and __show_action.
@@ -39,7 +42,7 @@ class TakeAction:
                 print("Hello. My name is " + self.playerName)
 
             self.getVectorResponse()
-            response = self.response[:5]
+            response = self.response[:4]
 
             # It's our turn, we should respond with an __action.
             actionObj = {
@@ -52,7 +55,7 @@ class TakeAction:
             maxIndex = response.index(maxValue)
 
             if maxIndex == 0:
-                actionObj["data"]["action"] = "check"
+                actionObj["data"]["action"] = "call"
             elif maxIndex == 1:
                 actionObj["data"]["action"] = "fold"
             elif maxIndex == 2:
@@ -62,8 +65,6 @@ class TakeAction:
                     self.__sendSlackStatus()
             elif maxIndex == 3:
                 actionObj["data"]["action"] = "raise"
-            elif maxIndex == 4:
-                actionObj["data"]["action"] = "call"
 
             return json.dumps(actionObj)
         elif action["eventName"] == "__show_action":
@@ -71,15 +72,32 @@ class TakeAction:
             self.__setTable(action["data"]["table"])
             self.__setPlayers(action["data"]["players"])
         elif action["eventName"] == "__bet":
-            print("Betting: " + str(self.response[6] * action["data"]["self"]["chips"]) + "\n")
-            # it's out turn, we should do a bet __action but I'm not exactly sure of when it's called.
-            return json.dumps({
+            # possibilities: [check, bet, fold]
+            print("We are betting!\n")
+            self.getVectorResponse()
+            response = self.response[:2] + self.response[4] #index 2 is "allin" which is not applicable here
+
+            actionObj = {
                 "eventName": "__action",
                 "data": {
-                    "action": "bet",
-                    "amount": int(self.response[6] * action["data"]["self"]["chips"])
+                    "action": "fold",
+                    "amount": 0
                 }
-            })
+            }
+            maxValue = max(response)
+            maxIndex = response.index(maxValue)
+
+            if maxIndex == 0:
+                actionObj["data"]["action"] = "check"
+            elif maxIndex == 1:
+                actionObj["data"]["action"] = "fold"
+            elif maxIndex == 2:
+                print("Betting: " + str(self.betAmount * action["data"]["self"]["chips"]) + "\n")
+                actionObj["data"]["action"] = "bet"
+                actionObj["data"]["amount"] = int(self.betAmount * action["data"]["self"]["chips"])
+
+            return actionObj
+
         elif action["eventName"] == "__deal":
             # The small and big blinds are set!
             self.__setTable(action["data"]["table"])
@@ -89,7 +107,7 @@ class TakeAction:
             print("Reload probability " + str(self.response[5]) + "\n")
             if self.reloadCount > 0 and self.response[5] > 0.5:
                 print("Reloaded!\n")
-                return json.dumps({"eventName" : "__reload"})
+                return json.dumps({"eventName": "__reload"})
         elif action["eventName"] == "__new_round":
             # The round begins, we have some useful info here.
             self.__setTable(action["data"]["table"])
@@ -101,7 +119,6 @@ class TakeAction:
         elif action["eventName"] == "__game_over":
             # Shows the winner
             print("The cake was a lie!")
-            # print(action["data"]["players"][self.playerName])
 
             if self.__Survive(action):
                 self.slackMessage = "We survived!"
