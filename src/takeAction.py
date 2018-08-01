@@ -25,7 +25,7 @@ class TakeAction:
         cards = self.__cards.copy()
         cards.extend(self.__tableCards)
         self.response = self.blackbox.run(cards, self.__players, self.__table)
-        print(self.response)
+        print(str(self.response))
 
 
     # Parses the Json and chooses an appropriate action
@@ -33,13 +33,13 @@ class TakeAction:
         # if the json is form a file use json.load(file)
         action = json.loads(jsonObject)
         self.slackMessage = ""  # reset message
-        print(action["eventName"])
+        print(str(action["eventName"]))
 
         # The Json for players and table is different for __action, __bet and __show_action.
         if action["eventName"] == "__action":
             if self.playerName == -1:
                 self.playerName = action["data"]["self"]["playerName"]
-                print("Hello. My name is " + self.playerName)
+                print("Hello. My name is " + str(self.playerName))
 
             self.getVectorResponse()
             response = self.response[:4]
@@ -61,7 +61,7 @@ class TakeAction:
             elif maxIndex == 2:
                 actionObj["data"]["action"] = "allin"
                 if action["data"]["self"]["chips"] >= 5000:
-                    self.slackMessage = "Oh boy. We are betting " + action["data"]["self"]["chips"] + " chips!!! Wish me luck."
+                    self.slackMessage = "Oh no. We are betting " + str(action["data"]["self"]["chips"]) + " chips!!! Wish me luck."
                     self.__sendSlackStatus()
             elif maxIndex == 3:
                 actionObj["data"]["action"] = "raise"
@@ -73,7 +73,7 @@ class TakeAction:
             self.__setPlayers(action["data"]["players"])
         elif action["eventName"] == "__bet":
             # possibilities: [check, bet, fold]
-            print("We are betting! AHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH\n")
+            print("We are betting!\n")
             self.getVectorResponse()
             response = self.response[:2]    # index 2 is "allin" which is not applicable here
             response.append(self.response[3])
@@ -135,7 +135,7 @@ class TakeAction:
     # Checks if we survived or not.
     def __Survive(self, action):
         for element in action["data"]["players"]:
-            print(element)
+            print(str(element))
             if element["playerName"] == self.playerName and element["isSurvive"]:
                 return True
         return False
@@ -143,7 +143,7 @@ class TakeAction:
 
     # sends AI status to slack webhook
     def __sendSlackStatus(self):
-        if self.debugMode == False:
+        if self.debugMode is False:
             slackClient.sendMessage(self.slackMessage)
 
 
