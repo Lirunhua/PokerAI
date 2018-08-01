@@ -48,7 +48,7 @@ class TakeAction:
             actionObj = {
                 "eventName": "__action",
                 "data": {
-                    "action:": None
+                    "action": ""
                 }
             }
             maxValue = max(response)
@@ -68,7 +68,7 @@ class TakeAction:
 
             return json.dumps(actionObj)
         elif action["eventName"] == "__show_action":
-            # Brodcasted to everyone when someone makes an __action (on their turn)
+            # Broadcast to everyone when someone makes an __action (on their turn)
             self.__setTable(action["data"]["table"])
             self.__setPlayers(action["data"]["players"])
         elif action["eventName"] == "__bet":
@@ -81,8 +81,8 @@ class TakeAction:
             actionObj = {
                 "eventName": "__action",
                 "data": {
-                    "action": None,
-                    "amount": None
+                    "action": "",
+                    "amount": 0
                 }
             }
             maxValue = max(response)
@@ -94,11 +94,10 @@ class TakeAction:
             elif maxIndex == 1:
                 actionObj["data"]["action"] = "fold"
             elif maxIndex == 2:
-                print("Betting: " + str(self.betAmount * action["data"]["self"]["chips"]) + "\n")
                 actionObj["data"]["action"] = "bet"
                 actionObj["data"]["amount"] = int(self.betAmount * action["data"]["self"]["chips"])
 
-            return actionObj
+            return json.dumps(actionObj)
 
         elif action["eventName"] == "__deal":
             # The small and big blinds are set!
