@@ -19,6 +19,11 @@ class BlackBox:
         self.handNetwork.clone(other.handNetwork)
         self.playerNetwork.clone(other.playerNetwork)
 
+    def cross(self, other):
+    	self.network.cross(other.network)
+        self.handNetwork.cross(other.handNetwork)
+        self.playerNetwork.cross(other.playerNetwork)
+
     def newGame(self):
         self.handNetwork.resetRecursion()
         self.playerNetwork.resetRecursion()
@@ -45,7 +50,7 @@ class BlackBox:
     class Network:
         def __init__(self, filename, functionType, inputSize, outputSize, recursionSize, layers = 1):
             self.functionType = functionType
-            self.layers = layers if layers > 0 else 1
+            self.layers = layers if  > 0 else 1
             self.inputSize = inputSize + recursionSize
             self.outputSize = outputSize + recursionSize
             self.layerSize = (self.inputSize + self.outputSize) * 2 // 3
@@ -87,8 +92,15 @@ class BlackBox:
             self.interval = other.interval
             self.layerMatrix = [[matrix.copy() for matrix in layer] for layer in other.layerMatrix]
             self.offset = [offset.copy() for offset in other.offset]
-            # Allow multiple mutations
-            for i in range(random.randint(0, self.layers + 2)):
+
+        def cross(self, other):
+        	for l in len(self.layers + 1):
+        		for i in len(self.layerMatrix[l]):
+        			if random.getrandbits(1):
+        				self.layerMatrix[l][i] = other.layerMatrix[l][i][:]
+        				self.offset[l][i] = other.offset[l][i]
+        	# Allow multiple mutations
+            for i in range(random.randint(0, self.inputSize * (self.layers + 1))):
                 self.mutate()
 
         def resetRecursion(self):

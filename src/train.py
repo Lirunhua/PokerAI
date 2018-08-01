@@ -65,6 +65,7 @@ class Table:
         for p in self.players:
             if not p.action.win:
                 p.action.blackbox.clone(random.choice(self.winners))
+                p.action.blackbox.cross(random.choice(self.winners))
             p.action.blackbox.saveAll()
         self.playerEndCount = 0
 
