@@ -12,7 +12,7 @@ class Main:
         self.debugMode = False
 
     # default url is test server.
-    def doListen(self, url="ws://poker-dev.wrs.club:3001"):
+    def doListen(self, url="ws://canada-ai-warmup-fbd9b486707f3df1.elb.us-east-1.amazonaws.com/"):
         try:
             ws = create_connection(url)
             ws.settimeout(5000)

@@ -75,7 +75,8 @@ class TakeAction:
             # possibilities: [check, bet, fold]
             print("We are betting!\n")
             self.getVectorResponse()
-            response = self.response[:2] + self.response[4] #index 2 is "allin" which is not applicable here
+            response = self.response[:2]    # index 2 is "allin" which is not applicable here
+            response.append(self.response[4])
 
             actionObj = {
                 "eventName": "__action",
