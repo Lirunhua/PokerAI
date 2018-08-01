@@ -13,32 +13,35 @@ class Main:
 
     # default url is test server.
     def doListen(self, url="ws://poker-dev.wrs.club:3001"):
-        try:
-            ws = create_connection(url)
-            ws.settimeout(5000)
-            ws.send(json.dumps({
-                "eventName": "__join",
-                "data": {
-                    "playerName": self.AI_name
-                }
-            }))
-            action = TakeAction(self.filenames, self.debugMode)
-            loop = True
-            while loop:
-                result = ws.recv()
-                response = action.processRequest(result) if result != "" else None
-                sys.stdout.flush()
-                
-                if response != None:
-                    ws.send(response)
-                    #loop = False
-        except Exception as e:
-            print("An error has occured")
-            print(e)
+        ws = create_connection(url)
+        ws.settimeout(5000)
+        ws.send(json.dumps({
+            "eventName": "__join",
+            "data": {
+                "playerName": self.AI_name
+            }
+        }))
+        action = TakeAction(self.filenames, self.debugMode)
+        loop = True
+        while loop:
+            result = ws.recv()
+            response = action.processRequest(result) if result != "" else None
             sys.stdout.flush()
-            self.doListen()
+            
+            if response != None:
+                ws.send(response)
+                #loop = False
 
 
 if __name__ == '__main__':
     m1 = Main()
-    m1.doListen("ws://canada-ai-warmup-battle-7da4ce4b0426974c.elb.us-east-1.amazonaws.com/")
+    while True:
+        try:
+            m1.doListen("ws://canada-ai-warmup-battle-7da4ce4b0426974c.elb.us-east-1.amazonaws.com/")
+        except KeyboardInterrupt:
+            break
+        except Exception as e:
+            print("An error has occured")
+            print(e)
+            sys.stdout.flush()
+
