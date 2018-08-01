@@ -73,10 +73,10 @@ class TakeAction:
             self.__setPlayers(action["data"]["players"])
         elif action["eventName"] == "__bet":
             # possibilities: [check, bet, fold]
-            print("We are betting!\n")
+            print("We are betting! AHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH\n")
             self.getVectorResponse()
             response = self.response[:2]    # index 2 is "allin" which is not applicable here
-            response.append(self.response[4])
+            response.append(self.response[3])
 
             actionObj = {
                 "eventName": "__action",
