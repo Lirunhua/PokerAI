@@ -81,12 +81,13 @@ class TakeAction:
             actionObj = {
                 "eventName": "__action",
                 "data": {
-                    "action": "fold",
-                    "amount": 0
+                    "action": None,
+                    "amount": None
                 }
             }
             maxValue = max(response)
             maxIndex = response.index(maxValue)
+            self.betAmount = self.response[5]
 
             if maxIndex == 0:
                 actionObj["data"]["action"] = "check"
