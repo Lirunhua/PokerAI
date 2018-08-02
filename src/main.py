@@ -1,6 +1,6 @@
 #!/usr/bin/env python
+import os
 from takeAction import TakeAction
-import time
 import json
 from websocket import create_connection
 import sys
@@ -12,7 +12,7 @@ class Main:
         self.debugMode = False
 
     # default url is test server.
-    def doListen(self, url="ws://poker-dev.wrs.club:3001"):
+    def doListen(self, url="ws://canada-ai-warmup-fbd9b486707f3df1.elb.us-east-1.amazonaws.com/"):
         try:
             ws = create_connection(url)
             ws.settimeout(5000)
@@ -26,15 +26,18 @@ class Main:
             loop = True
             while loop:
                 result = ws.recv()
-                response = action.processRequest(result) if result != "" else None
+                response = action.processRequest(result) if result is not None and result != "" else None
                 sys.stdout.flush()
-                
-                if response != None:
+
+                if response is not None:
+                    print(response)
                     ws.send(response)
                     #loop = False
         except Exception as e:
-            print("An error has occured")
-            print(e)
+            print("An error has occurred")
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            print(exc_type, fname, exc_tb.tb_lineno)
             sys.stdout.flush()
             self.doListen()
 
