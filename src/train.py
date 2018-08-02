@@ -8,7 +8,8 @@ import sys
 
 
 class Table:
-    def __init__(self, playerCount, names, players):
+    def __init__(self, playerCount, names, players, name):
+        self.name = "1997%d"%name
         self.playerCount = playerCount
         self.thread = []
         self.players = [Main(n, True) for n in names]
@@ -70,17 +71,18 @@ class Table:
         self.playerEndCount = 0
 
 
-
+def getBots(n):
+    global botPool
+    temp = botPool[:n]
+    botpool = botPool[n:]
+    return temp
 
 # Create the population.
 population = 25
 everyone = [TakeAction(["../data/trainingFile_%d_1.txt"%i,"../data/trainingFile_%d_2.txt"%i,"../data/trainingFile_%d_3.txt"%i], True) for i in range(population)]
+num = 1
 botPool = everyone[:] #shallow copy
-tables = [
-    Table(10, ['GLaDOS%d'%i for i in range(10)], botPool[:10]).tableConstructor(),
-    Table(4, ['GLaDOS1%d'%i for i in range(4)], botPool[10:14]).tableConstructor()
-]
-botPool = botPool[14:]
+tables = [Table(i%8+3, ['GLaDOS_%d_%d'%(t,i) for i in range(i%8+3)], getBots(i%8+3), t).tableConstructor() for t in range(8 * num)]
 lock = False
 running = True
 
