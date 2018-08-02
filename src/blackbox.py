@@ -20,7 +20,7 @@ class BlackBox:
         self.playerNetwork.clone(other.playerNetwork)
 
     def cross(self, other):
-    	self.network.cross(other.network)
+        self.network.cross(other.network)
         self.handNetwork.cross(other.handNetwork)
         self.playerNetwork.cross(other.playerNetwork)
 
@@ -50,7 +50,7 @@ class BlackBox:
     class Network:
         def __init__(self, filename, functionType, inputSize, outputSize, recursionSize, layers = 1):
             self.functionType = functionType
-            self.layers = layers if  > 0 else 1
+            self.layers = layers if layers > 0 else 1
             self.inputSize = inputSize + recursionSize
             self.outputSize = outputSize + recursionSize
             self.layerSize = (self.inputSize + self.outputSize) * 2 // 3
@@ -94,12 +94,12 @@ class BlackBox:
             self.offset = [offset.copy() for offset in other.offset]
 
         def cross(self, other):
-        	for l in len(self.layers + 1):
-        		for i in len(self.layerMatrix[l]):
-        			if random.getrandbits(1):
-        				self.layerMatrix[l][i] = other.layerMatrix[l][i][:]
-        				self.offset[l][i] = other.offset[l][i]
-        	# Allow multiple mutations
+            for l in range(self.layers + 1):
+                for i in range(len(self.layerMatrix[l])):
+                    if random.getrandbits(1):
+                        self.layerMatrix[l][i] = other.layerMatrix[l][i][:]
+                        self.offset[l][i] = other.offset[l][i]
+            # Allow multiple mutations
             for i in range(random.randint(0, self.inputSize * (self.layers + 1))):
                 self.mutate()
 

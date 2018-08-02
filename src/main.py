@@ -1,17 +1,20 @@
 #!/usr/bin/env python
+import os
 from takeAction import TakeAction
 import json
 from websocket import create_connection
 import sys, os
 
 class Main:
-    def __init__(self, name="197818", filenames = ["../data/file1.txt","../data/file2.txt","../data/file3.txt"]):
+    def __init__(self, name="197818", debug = False, filenames = ["../data/file1.txt","../data/file2.txt","../data/file3.txt"]):
         self.AI_name = name
         self.filenames = filenames
-        self.action = TakeAction(self.filenames)
+        self.debugMode = debug
+        self.action = TakeAction(self.filenames, self.debugMode)
+        
 
     # default url is test server.
-    def doListen(self, url="ws://poker-dev.wrs.club:3001"):
+    def doListen(self, url="ws://canada-ai-warmup-fbd9b486707f3df1.elb.us-east-1.amazonaws.com/"):
         try:
             ws = create_connection(url)
             ws.settimeout(5000)
@@ -26,8 +29,10 @@ class Main:
                 result = ws.recv()
                 response = self.action.processRequest(result) if result != "" else None
                 sys.stdout.flush()
-                
-                if response != None:
+
+                if response is not None:
+                    if not self.debugMode:
+                        print(response)
                     ws.send(response)
             print ("exited the loop!")
         except Exception as e:

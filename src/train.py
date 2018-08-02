@@ -11,7 +11,7 @@ class Table:
     def __init__(self, playerCount, names, players):
         self.playerCount = playerCount
         self.thread = []
-        self.players = [Main(n) for n in names]
+        self.players = [Main(n, True) for n in names]
         self.playerEndCount = 0
         self.winners = []
         # remove default network
@@ -74,10 +74,13 @@ class Table:
 
 # Create the population.
 population = 25
-everyone = [TakeAction(["../data/trainingFile_%d_1.txt"%i,"../data/trainingFile_%d_2.txt"%i,"../data/trainingFile_%d_3.txt"%i]) for i in range(population)]
+everyone = [TakeAction(["../data/trainingFile_%d_1.txt"%i,"../data/trainingFile_%d_2.txt"%i,"../data/trainingFile_%d_3.txt"%i], True) for i in range(population)]
 botPool = everyone[:] #shallow copy
-tables = [Table(10, ['GLaDOS%d'%i for i in range(10)], botPool[:10]).tableConstructor()]
-botPool = botPool[10:]
+tables = [
+    Table(10, ['GLaDOS%d'%i for i in range(10)], botPool[:10]).tableConstructor(),
+    Table(4, ['GLaDOS1%d'%i for i in range(4)], botPool[10:14]).tableConstructor()
+]
+botPool = botPool[14:]
 lock = False
 running = True
 
