@@ -15,7 +15,6 @@ class TakeAction:
         self.blackbox = BlackBox(files, 6, 7, 7, 6)
         self.playerName = -1
         self.response = [0, 0, 0, 0, 0, 0]
-        self.reloadCount = 2
         self.reload = 0
         self.betAmount = 100
 
@@ -106,7 +105,7 @@ class TakeAction:
         elif action["eventName"] == "__start_reload":
             # we should either reload or not, so T/F
             print("Reload probability " + str(self.response[5]) + "\n")
-            if self.reloadCount > 0 and self.response[5] > 0.5:
+            if self.response[5] > 0.5:
                 print("Reloaded!\n")
                 return json.dumps({"eventName": "__reload"})
         elif action["eventName"] == "__new_round":
