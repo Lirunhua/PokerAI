@@ -1,7 +1,7 @@
 import random
 import numpy
 import json
-import os.path
+import sys, os.path
 
 # create a recurring neural network with 
 class BlackBox:
@@ -32,11 +32,11 @@ class BlackBox:
     def run(self, cards, playersData, otherData):
         if len(cards) == 2:
             self.handNetwork.resetRecursion()
-        handOut = []
+        handOut = [0] * 10
         for c in cards:
             handOut = self.handNetwork.run(c)
 
-        playerOut = []
+        playerOut = [0] * 10
         for p in playersData:
             playerOut = self.playerNetwork.run(p)
 
@@ -84,35 +84,36 @@ class BlackBox:
 
         # Constructor useful for training
         def clone(self, other):
-            self.functionType = other.functionType
-            self.inputSize = other.inputSize
-            self.outputSize = other.outputSize
-            self.index = other.index
-            self.recursion = other.recursion.copy()
-            self.interval = other.interval
-            self.layerMatrix = [[matrix.copy() for matrix in layer] for layer in other.layerMatrix]
-            self.offset = [offset.copy() for offset in other.offset]
+            self.layerMatrix = [[matrix[:] for matrix in layer] for layer in other.layerMatrix]
+            self.offset = [o[:] for o in other.offset]
 
         def cross(self, other):
-            for l in range(self.layers + 1):
-                for i in range(len(self.layerMatrix[l])):
-                    if random.getrandbits(1):
-                        self.layerMatrix[l][i] = other.layerMatrix[l][i][:]
-                        self.offset[l][i] = other.offset[l][i]
-            # Allow multiple mutations
-            for i in range(random.randint(0, self.inputSize * (self.layers + 1))):
-                self.mutate()
+            try:
+                for l in range(self.layers + 1):
+                    for i in range(len(self.layerMatrix[l])):
+                        if random.getrandbits(1):
+                            self.layerMatrix[l][i] = other.layerMatrix[l][i][:]
+                            self.offset[l][i] = other.offset[l][i]
+                # Allow multiple mutations
+                for i in range(random.randint(0, self.inputSize * (self.layers + 1))):
+                    self.mutate()
+            except Exception as e:
+                print("Error during cross")
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                print(exc_type, fname, exc_tb.tb_lineno)
+                sys.stdout.flush()
 
         def resetRecursion(self):
             self.recursion = [0 for i in self.recursion]
 
         def run(self, inputData):
-            inputData.extend(self.recursion)
-            output = inputData + self.recursion
+            output = inputData[:] + self.recursion[:]
             for layer in range(len(self.layerMatrix)):
                 output = [self.f(float(self.offset[layer][i]) + sum([float(output[j]) * float(self.layerMatrix[layer][i][j])
-                            for j in range(len(self.layerMatrix[layer][i]))]))
-                            for i in range(len(self.layerMatrix[layer]))]
+                    for j in range(len(self.layerMatrix[layer][i]))]))
+                    for i in range(len(self.layerMatrix[layer]))]
+
             self.recursion = output[self.index:]
             return output[:self.index]
 
@@ -142,8 +143,7 @@ class BlackBox:
 # Testing
 if __name__ == '__main__':
     filenameArray = ["../data/file1.txt","../data/file2.txt","../data/file3.txt"]
-    b = BlackBox(filenameArray, 6, 7, 7, 5)
+    b = BlackBox(filenameArray, 6, 7, 7, 6)
     b.newGame
-    b.saveAll(filenameArray)
-    #print(b.run([[1,2,3],[3,4,2]], [[4,5,6],[1,3,5],[4,2,6]], [7,8,9]))
-    b2 = BlackBox(filenameArray,6, 7, 7, 5).clone(b)
+    b.saveAll()
+    b2 = BlackBox(filenameArray,6, 7, 7, 6).clone(b)

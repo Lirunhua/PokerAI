@@ -38,7 +38,16 @@ class TakeAction:
     # Parses the Json and chooses an appropriate action
     def processRequest(self, jsonObject):
         # if the json is form a file use json.load(file)
-        action = json.loads(jsonObject)
+        try:
+            action = json.loads(jsonObject)
+        except Exception as e:
+            return None
+
+        if "eventName" not in action:
+            print("json object has no eventName")
+            print(str(action))
+            return None
+
         self.slackMessage = ""  # reset message
         if not self.debugMode:
             print(str(action["eventName"]))
@@ -162,7 +171,7 @@ class TakeAction:
 
     # sends AI status to slack webhook
     def __sendSlackStatus(self):
-        if self.debugMode is False:
+        if not self.debugMode :
             slackClient.sendMessage(self.slackMessage)
 
 

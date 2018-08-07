@@ -15,33 +15,33 @@ class Main:
 
     # default url is test server.
     def doListen(self, url="ws://canada-ai-warmup-fbd9b486707f3df1.elb.us-east-1.amazonaws.com/"):
-        try:
-            ws = create_connection(url)
-            ws.settimeout(5000)
-            ws.send(json.dumps({
-                "eventName": "__join",
-                "data": {
-                    "playerName": self.AI_name
-                }
-            }))
-            loop = True
-            while loop:
-                result = ws.recv()
-                response = self.action.processRequest(result) if result != "" else None
-                sys.stdout.flush()
-
-                if response is not None:
-                    if not self.debugMode:
-                        print(response)
-                    ws.send(response)
-            print ("exited the loop!")
-        except Exception as e:
-            print("An error has occured")
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-            print(exc_type, fname, exc_tb.tb_lineno)
+        #try:
+        ws = create_connection(url)
+        ws.settimeout(5000)
+        ws.send(json.dumps({
+            "eventName": "__join",
+            "data": {
+                "playerName": self.AI_name
+            }
+        }))
+        loop = True
+        while loop:
+            result = ws.recv()
+            response = self.action.processRequest(result)
             sys.stdout.flush()
-            self.doListen()
+
+            if response is not None:
+                if not self.debugMode:
+                    print(response)
+                ws.send(response)
+        print ("exited the loop!")
+        #except Exception as e:
+        #    print("An error has occured for %s"%self.AI_name)
+        #    exc_type, exc_obj, exc_tb = sys.exc_info()
+        #    fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        #    print(exc_type, fname, exc_tb.tb_lineno)
+        #    sys.stdout.flush()
+        #    self.doListen(url)
 
     def setAction(self, action):
         self.action = action

@@ -78,11 +78,11 @@ def getBots(n):
     return temp
 
 # Create the population.
-population = 25
-everyone = [TakeAction(["../data/trainingFile_%d_1.txt"%i,"../data/trainingFile_%d_2.txt"%i,"../data/trainingFile_%d_3.txt"%i], True) for i in range(population)]
 num = 1
+population = num * 52 + 10
+everyone = [TakeAction(["../data/trainingFile_%d_1.txt"%i,"../data/trainingFile_%d_2.txt"%i,"../data/trainingFile_%d_3.txt"%i], True) for i in range(population)]
 botPool = everyone[:] #shallow copy
-tables = [Table(i%8+3, ['GLaDOS_%d_%d'%(t,i) for i in range(i%8+3)], getBots(i%8+3), t).tableConstructor() for t in range(8 * num)]
+tables = [Table(t%8+3, ['GLaDOS_%d_%d'%(t,i) for i in range(t%8+3)], getBots(t%8+3), t).tableConstructor() for t in range(8 * num)]
 lock = False
 running = True
 
