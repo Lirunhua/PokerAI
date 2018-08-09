@@ -10,6 +10,9 @@ class TakeAction:
         self.__tableCards = None
         self.__table = None
         self.__players = None
+        self.doCallback = False
+        self.endGameCallback = None
+        self.win = True
         self.debugMode = debugMode
         self.slackMessage = ""
         self.blackbox = BlackBox(files, 6, 7, 7, 6)
@@ -18,27 +21,43 @@ class TakeAction:
         self.reload = 0
         self.betAmount = 100
 
+    def setCallback(self, callback):
+        self.doCallback = True
+        self.endGameCallback = callback
+
     def getVectorResponse(self):
         # format of response vector: [call/check, fold, allin, raise/bet, reload (T/F), bet amount]
         # we can also perform a check (i.e. calling with an amount of 0 chips)
         cards = self.__cards.copy()
         cards.extend(self.__tableCards)
         self.response = self.blackbox.run(cards, self.__players, self.__table)
-        print(str(self.response))
+        if not self.debugMode:
+            print(str(self.response))
 
 
     # Parses the Json and chooses an appropriate action
     def processRequest(self, jsonObject):
         # if the json is form a file use json.load(file)
-        action = json.loads(jsonObject)
+        try:
+            action = json.loads(jsonObject)
+        except Exception as e:
+            return None
+
+        if "eventName" not in action:
+            print("json object has no eventName")
+            print(str(action))
+            return None
+
         self.slackMessage = ""  # reset message
-        print(str(action["eventName"]))
+        if not self.debugMode:
+            print(str(action["eventName"]))
 
         # The Json for players and table is different for __action, __bet and __show_action.
         if action["eventName"] == "__action":
             if self.playerName == -1:
                 self.playerName = action["data"]["self"]["playerName"]
-                print("Hello. My name is " + str(self.playerName))
+                if not self.debugMode:
+                    print("Hello. My name is " + str(self.playerName))
 
             self.getVectorResponse()
             response = self.response[:4]
@@ -65,6 +84,8 @@ class TakeAction:
             elif maxIndex == 3:
                 actionObj["data"]["action"] = "raise"
 
+            self.playerName = action["data"]["self"]["playerName"]
+
             return json.dumps(actionObj)
         elif action["eventName"] == "__show_action":
             # Broadcast to everyone when someone makes an __action (on their turn)
@@ -72,7 +93,8 @@ class TakeAction:
             self.__setPlayers(action["data"]["players"])
         elif action["eventName"] == "__bet":
             # possibilities: [check, bet, fold]
-            print("We are betting!\n")
+            if not self.debugMode:
+                print("We are betting!\n")
             self.getVectorResponse()
             response = self.response[:2]    # index 2 is "allin" which is not applicable here
             response.append(self.response[3])
@@ -104,9 +126,11 @@ class TakeAction:
             self.__setPlayers(action["data"]["players"])
         elif action["eventName"] == "__start_reload":
             # we should either reload or not, so T/F
-            print("Reload probability " + str(self.response[5]) + "\n")
+            if not self.debugMode:
+                print("Reload probability " + str(self.response[5]) + "\n")
             if self.response[5] > 0.5:
-                print("Reloaded!\n")
+                if not self.debugMode:
+                    print("Reloaded!\n")
                 return json.dumps({"eventName": "__reload"})
         elif action["eventName"] == "__new_round":
             # The round begins, we have some useful info here.
@@ -118,23 +142,28 @@ class TakeAction:
             self.__setPlayers(action["data"]["players"])
         elif action["eventName"] == "__game_over":
             # Shows the winner
-            print("The cake was a lie!")
-
-            if self.__Survive(action):
+            self.win = self.__Survive(action)
+            if self.win:
                 self.slackMessage = "We survived!"
             else:
                 self.slackMessage = "We didn't survive."
             self.__sendSlackStatus()
+
+            if self.doCallback:
+                self.endGameCallback(self)
+
         elif action["eventName"] == "__new_peer":
             # response to our __join request
-            print("I'm in!")
+            if not self.debugMode:
+                print("I'm in!")
 
         return None
 
     # Checks if we survived or not.
     def __Survive(self, action):
         for element in action["data"]["players"]:
-            print(str(element))
+            if not self.debugMode:
+                print(str(element))
             if element["playerName"] == self.playerName and element["isSurvive"]:
                 return True
         return False
@@ -142,7 +171,7 @@ class TakeAction:
 
     # sends AI status to slack webhook
     def __sendSlackStatus(self):
-        if self.debugMode is False:
+        if not self.debugMode :
             slackClient.sendMessage(self.slackMessage)
 
 
