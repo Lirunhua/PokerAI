@@ -1,5 +1,4 @@
 import json
-import random
 from blackbox import BlackBox
 import slackClient
 
@@ -20,6 +19,8 @@ class TakeAction:
         self.response = [0, 0, 0, 0, 0, 0]
         self.reload = 0
         self.betAmount = 100
+        self.totalChips = 0
+        self.gameChips = 0
 
     def setCallback(self, callback):
         self.doCallback = True
@@ -134,6 +135,7 @@ class TakeAction:
                 return json.dumps({"eventName": "__reload"})
         elif action["eventName"] == "__new_round":
             # The round begins, we have some useful info here.
+            self.gameChips = 0
             self.__setTable(action["data"]["table"])
             self.__setPlayers(action["data"]["players"])
         elif action["eventName"] == "__round_end":
@@ -143,8 +145,11 @@ class TakeAction:
         elif action["eventName"] == "__game_over":
             # Shows the winner
             self.win = self.__Survive(action)
+
             if self.win:
-                self.slackMessage = "We survived!"
+                self.slackMessage = "We survived! We won with " + \
+                                    str(self.gameChips) + " chips. We now have a total of " \
+                                    + str(self.totalChips) + " chips."
             else:
                 self.slackMessage = "We didn't survive."
             self.__sendSlackStatus()
@@ -165,6 +170,8 @@ class TakeAction:
             if not self.debugMode:
                 print(str(element))
             if element["playerName"] == self.playerName and element["isSurvive"]:
+                self.gameChips = element["chips"]
+                self.totalChips += self.gameChips
                 return True
         return False
     #     self.__sendSlackStatus()
