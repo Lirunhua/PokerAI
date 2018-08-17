@@ -1,5 +1,5 @@
 # Team Intern PokerAI
-Team: David Bonsant, Jess cannarozzo, Dharina Hanumunthadu, Rouzbeh Majidi, Dieter Verhufen
+Team: David Bonsant, Jess Cannarozzo, Dharina Hanumunthadu, Rouzbeh Majidi, Dieter Verhufen
 
 ### TODO list:
 - [x] Compare hand to dataset and create meaningful data from it.
